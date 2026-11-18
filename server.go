@@ -21,6 +21,10 @@ func newServer() *server {
 
 func (s *server) run() {
 	for cmd := range s.commads {
+		if cmd.client.closed {
+			continue
+		}
+
 		switch cmd.id {
 		case CMD_NICK:
 			s.nick(cmd.client, cmd.args)
@@ -107,6 +111,8 @@ func (s *server) msg(c *client, args []string) {
 }
 
 func (s *server) quit(c *client) {
+	c.closed = true
+
 	log.Printf("Client disconnected: %v", c.conn.RemoteAddr().String())
 	s.quitRoom(c)
 	c.msg("Goodbye!")
